@@ -1,0 +1,55 @@
+name: ShieldCall AI - CI Build Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  audit-backend:
+    name: Backend (Express) Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Audit TypeScript Compilation
+        run: |
+          cd server
+          npm run build
+
+  audit-frontend:
+    name: Frontend (Next.js) Build Audit
+    runs-on: ubuntu-latest
+    needs: audit-backend
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Verify Production Next.js Bundle
+        run: |
+          cd client
+          npm run build
